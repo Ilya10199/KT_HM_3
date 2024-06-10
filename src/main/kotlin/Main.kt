@@ -1,4 +1,5 @@
 data class Likes(val count: Int = 0)
+data class Donut(val isDon: Boolean = false)
 
 interface Attachment {
     val type: String
@@ -58,6 +59,14 @@ data class Post(
     }
 }
 
+data class Comment(
+    var id: Int = 0,
+    val fromId: Int = 0,
+    val date: Int = 0,
+    val text: String? = null
+)
+
+
 data class Photo(
     val id: Int, val ownerId: Int, val photo130: String, val photo604: String
 )
@@ -105,8 +114,12 @@ data class EventAttachment(val event: Event) : Attachment {
     override val type: String = "Event"
 }
 
+class PostNotFoundException(message: String) : Exception(message)
+
 
 object WallService {
+
+    private var comments = emptyArray<Comment>()
     private var posts = emptyArray<Post>()
     private var lastId = 0
 
@@ -138,14 +151,32 @@ object WallService {
         }
         println()
     }
+
+    fun createComment(postId: Int, comment: Comment): Comment {
+        for ((index, post) in posts.withIndex()) {
+            if (post.id == postId) {
+                comments += comment.copy(id = postId)
+                comment.id = postId
+                return comment
+            }
+
+        }
+        throw PostNotFoundException(message = "there is no such id")
+    }
+
 }
 
 
 fun main() {
     //WallService.add(Post(0, 1, 2, 1, "Privet"))
     //WallService.add(Post(0, 2, 4, 5, "Poka"))
-    println((PhotoAttachment(Photo(1, 2, "https://vk.com/some_photo_link", "https://vk.com/another_photo_link"))))
-    WallService.add(Post(1, 2, 3, 5, "da"))
-
+    //println((PhotoAttachment(Photo(1, 2, "https://vk.com/some_photo_link", "https://vk.com/another_photo_link"))))
+    WallService.add(Post(1, 2, 3, 5, "da" ))
+    WallService.add(Post(1, 3, 4, 6, "not"))
+    WallService.add(Post(1, 3, 4, 6, "not"))
+  //  WallService.update(Post(1, 3, 4, 6, "not", ))
+    WallService.createComment(3, Comment(1, 2, 3, "no"))
+   // WallService.createComment(2, Comment(1, 2, 3, "da"))
+    //WallService.createComment(3, Comment(1, 2,3,"da"))
     WallService.printPost()
 }
